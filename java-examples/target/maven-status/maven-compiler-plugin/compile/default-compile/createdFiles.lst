@@ -1,0 +1,5 @@
+com\azure\cassandrami\repository\User.class
+com\azure\cassandrami\examples\UserProfile.class
+com\azure\cassandrami\util\Configurations.class
+com\datastax\oss\driver\internal\core\loadbalancing\CustomLoadBalancingPolicy.class
+com\azure\cassandrami\repository\UserRepository.class
