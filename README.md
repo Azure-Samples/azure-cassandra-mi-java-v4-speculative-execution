@@ -32,7 +32,7 @@ The sample loads data into a Cassandra table and artificially degrades the perfo
     1. Enter `username` and `password` in `datastax-java-driver.advanced.auth-provider` section, and the IP addresses of your cluster seed nodes in `datastax-java-driver.basic.contact-points`. 
     1. Choose one node for which performance will be artifically degraded by the app, and enter the I.P. address of that node in `nodeToDegrade`.
 
-1. Run `mvn clean package` from java-examples folder to build the project. This will generate cassandra-mi-load-tester-1.0.0-SNAPSHOT.jar under target folder.
+1. Run `mvn clean package` from java-examples folder to build the project. This will generate `cassandra-mi-load-tester-1.0.0-SNAPSHOT.jar` under target folder.
 
 1. Run `java -jar target/cassandra-mi-load-tester-1.0.0-SNAPSHOT.jar` in a terminal to start your java application. Initially this will run **without** using speculative query execution policy. It will create a keyspace and user table, load 50 records, and then read those records, measuring the p50, p99, and min/max latencies. You should see quite high latencies for P99 and max (along with messages that the selected node is degraded):
 
