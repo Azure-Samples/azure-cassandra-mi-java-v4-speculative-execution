@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.azure.cassandrami.repository;
 
 import com.datastax.oss.driver.api.core.ConsistencyLevel;

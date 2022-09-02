@@ -5,7 +5,7 @@ languages:
 products:
 - azure
 description: "How to implement speculative execution policy in Azure Managed Instance for Apache Cassandra"
-urlFragment: azure-cassandra-mi-dotnet-core-getting-started
+urlFragment: azure-cassandra-mi-java-v4-speculative-execution
 ---
 
 # How to implement speculative execution policy in Azure Managed Instance for Apache Cassandra.
