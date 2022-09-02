@@ -25,6 +25,8 @@ The sample loads data into a Cassandra table and artificially degrades the perfo
 
 ## Running this sample
 
+1. Clone this repository using `git clone https://github.com/Azure-Samples/azure-cassandra-mi-java-v4-speculative-execution`
+
 1.  Update parameters in `java-exmple/src/main/resources/application.conf`: 
     1. Enter the datacenter name in the `DC` field.
     1. Enter `username` and `password` in `datastax-java-driver.advanced.auth-provider` section, and the IP addresses of your cluster seed nodes in `datastax-java-driver.basic.contact-points`. 
