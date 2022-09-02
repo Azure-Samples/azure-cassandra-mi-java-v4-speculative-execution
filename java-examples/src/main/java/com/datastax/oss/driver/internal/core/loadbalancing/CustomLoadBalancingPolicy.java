@@ -18,6 +18,9 @@ package com.datastax.oss.driver.internal.core.loadbalancing;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
+import java.io.IOException;
+
+import com.azure.cassandrami.util.Configurations;
 import com.datastax.dse.driver.internal.core.tracker.MultiplexingRequestTracker;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverExecutionProfile;
@@ -67,6 +70,7 @@ public class CustomLoadBalancingPolicy extends BasicLoadBalancingPolicy implemen
   protected final Map<Node, AtomicLongArray> responseTimes = new ConcurrentHashMap<>();
   protected final Map<Node, Long> upTimes = new ConcurrentHashMap<>();
   private final boolean avoidSlowReplicas;
+  Configurations config = new Configurations();
 
   public CustomLoadBalancingPolicy(@NonNull DriverContext context, @NonNull String profileName) {
     super(context, profileName);
@@ -209,16 +213,25 @@ public class CustomLoadBalancingPolicy extends BasicLoadBalancingPolicy implemen
       @NonNull Node node,
       @NonNull String logPrefix) {
 
-        System.out.println("node: "+node.getBroadcastAddress().get().toString());
-           if (node.getBroadcastAddress().get().toString().equals("/10.0.1.5:0")){
-      try {
-        System.out.println("node "+node.getBroadcastAddress().get()+" is being artificially slowed down....");
-        Thread.sleep(5000);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
+        try {
+          //System.out.println("node: "+node.getBroadcastAddress().get().toString());
+          String nodeToDegrade = "/"+config.getProperty("nodeToDegrade")+":0";
+          if (node.getBroadcastAddress().get().toString().equals(nodeToDegrade)){
+            System.out.println("response from node "+node.getBroadcastAddress().get()+" artificially degraded....");
+            Thread.sleep(500);
+          }
+        } catch (NumberFormatException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        } catch (IOException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        } catch (InterruptedException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+
+      
     updateResponseTimes(node);
   }
 

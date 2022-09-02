@@ -64,7 +64,7 @@ public class UserRepository {
      */
     public void insertUser(final String preparedStatement, final String id, final String name, final String city) {
         final PreparedStatement prepared = this.session.prepare(preparedStatement);
-        final BoundStatement bound = prepared.bind(city, id, name).setIdempotent(false);
+        final BoundStatement bound = prepared.bind(city, id, name).setIdempotent(true);
         this.session.execute(bound);
     }
 

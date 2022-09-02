@@ -8,7 +8,6 @@ import com.github.javafaker.Faker;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
@@ -25,7 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class UserProfile {
 
-    public int iterations = 100;
+    public int iterations = 1;
     public int NUMBER_OF_THREADS = 1;
     public int NUMBER_OF_WRITES_PER_THREAD = 2;
 
@@ -36,13 +35,11 @@ public class UserProfile {
     AtomicInteger readCount = new AtomicInteger(0);
     AtomicInteger verifyCount = new AtomicInteger(0);
     AtomicLong totalLatency = new AtomicLong(0);
-    AtomicLong totalReadLatency = new AtomicLong(0);
     Queue<Long> latencies = new ConcurrentLinkedQueue<Long>();
-    //List<Long> latencies = new ArrayList<Long>();
     private static Configurations config = new Configurations();
 
     public void loadData(final String keyspace, final String table, final UserRepository repository,
-            final UserProfile u, final String preparedStatement, final String finalQuery, final int noOfThreads,
+            final UserProfile u, final String preparedStatement, final int noOfThreads,
             final int noOfWritesPerThread) throws InterruptedException, NumberFormatException, IOException {
 
         final Faker faker = new Faker();
@@ -59,7 +56,6 @@ public class UserProfile {
                         final String name = faker.name().lastName();
                         final String city = faker.address().city();
                         u.recordCount.incrementAndGet();
-                        System.out.println("Insert user id: "+strGuid);
                         repository.insertUser(preparedStatement, guid.toString(), name, city);
                         u.insertCount.incrementAndGet();
                     } catch (final Exception e) {
@@ -81,8 +77,7 @@ public class UserProfile {
     }
 
     public void readTest(final String keyspace, final String table, final UserRepository repository,
-            final UserProfile u, final String preparedStatement, final String finalQuery, final int noOfThreads,
-            final int noOfWritesPerThread) throws InterruptedException, NumberFormatException, IOException {
+            final UserProfile u, final int noOfThreads, final int noOfWritesPerThread) throws InterruptedException, NumberFormatException, IOException {
 
         Configurations config = new Configurations();
         List<String> list = new ArrayList<String>();
@@ -97,11 +92,10 @@ public class UserProfile {
         for (int i=0; i<iterations; i++){
             for (List<String> splitList : lists) {
                 final Runnable task = () -> {
-                    for (final String id : splitList) {
-                        // System.out.print("id:" + id + "\n");                    
+                    for (final String id : splitList) {                 
                         try{
                             final long startTime = System.currentTimeMillis();
-                            String userid = repository.selectUser(id, keyspace, table);
+                            repository.selectUser(id, keyspace, table);
                             final long endTime = System.currentTimeMillis();
                             final long duration = (endTime - startTime);
                             latencies.add(duration);
@@ -126,8 +120,6 @@ public class UserProfile {
             for (final Long id : this.latencies) {
                 latencies.add(id);
             }
-            //final long latency = (this.totalLatency.get() / this.insertCount.get());
-            //System.out.print("Average read Latency in milliseconds: " + latency + "\n");
             System.out.println("Total number of reads executed: "+u.readCount.get());
             System.out.println("p50 latency: "+percentile(latencies, 50));
             System.out.println("p99 latency: "+percentile(latencies, 99));
@@ -145,14 +137,6 @@ public class UserProfile {
             Thread.sleep(1000);
         }
         System.out.print("load test done." + "\n");
-    }
-
-    private void pressAnyKeyToContinue() {
-        System.out.println("disable node in hosts then press any key to continue...");
-        try {
-            System.in.read();
-        } catch (Exception e) {
-        }
     }
 
     public static long percentile(List<Long> latencies, double percentile) {
@@ -174,7 +158,7 @@ public class UserProfile {
 
         try {
 
-            // Create keyspace and table in cassandra cource database
+            // Create keyspace and table in cassandra database
             System.out.println("Dropping source keyspace " + keyspace + " (if exists)... ");
             sourcerepository.deleteTable("DROP KEYSPACE IF EXISTS " + keyspace + "");
             System.out.println("Done dropping source keyspace " + keyspace + ".");
@@ -189,23 +173,18 @@ public class UserProfile {
             Thread.sleep(3000);
 
 
-            // Setup load test queries
+            // Setup load test 
             final String loadTestPreparedStatement = "insert into " + keyspace + "." + table + " (user_bcity,user_id,"
                     + "user_name) VALUES (?,?,?)";                   
-            final String loadTestFinalSelectQuery = "SELECT COUNT(*) as coun FROM " + keyspace + "." + table + "";
 
             // Run Load Test - Insert rows into user table
-            u.loadData(keyspace, table, sourcerepository, u, loadTestPreparedStatement, loadTestFinalSelectQuery,
+            u.loadData(keyspace, table, sourcerepository, u, loadTestPreparedStatement, 
                     NUMBER_OF_THREADS, NUMBER_OF_WRITES_PER_THREAD);
                     Thread.sleep(3000);
-
-                    u.pressAnyKeyToContinue();
-            u.readTest(keyspace, table, sourcerepository, u, loadTestPreparedStatement, loadTestFinalSelectQuery,
-                    NUMBER_OF_THREADS, NUMBER_OF_WRITES_PER_THREAD);
+            u.readTest(keyspace, table, sourcerepository, u, NUMBER_OF_THREADS, NUMBER_OF_WRITES_PER_THREAD);
         } catch (final Exception e) {
             System.out.println("Main Exception " + e);
         }
-        //System.out.println("Finished loading data.");
         System.exit(0);
     }
 }
