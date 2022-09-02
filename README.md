@@ -38,7 +38,7 @@ The sample loads data into a Cassandra table and artificially degrades the perfo
 
 1. Next, review the content of the `speculative-execution-policy` section in `java-exmple/src/main/resources/application.conf`. Notice the line `class = ConstantSpeculativeExecutionPolicy` which is commented out. When this line is commented out, a default class of `NoSpeculativeExecutionPolicy` is used. Uncomment `class = ConstantSpeculativeExecutionPolicy` to implement speculative execution.
 
-1. Run the application again. You should see significantly reduced p99 and max latency, as other nodes are speculatively queried while waiting for the response from the initial node that was queried if it exceeds a certain delay - see below. The number of nodes that are tried, and the amount to time to wait for a response from each node, is based on the values set for `max-executions` and `delay` respectively.
+1. Run the application again. You should see significantly reduced p99 and max latency, as other nodes are speculatively queried while waiting for the response from the initial node that was queried if it exceeds a certain delay - see below. The number of nodes that are tried, and the amount of time to wait for a response from each node, is based on the values set for `max-executions` and `delay` respectively.
 
     ![Run 2](/media/run2.png?raw=true "run 2")
 
