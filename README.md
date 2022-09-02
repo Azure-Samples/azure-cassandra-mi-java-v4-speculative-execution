@@ -27,20 +27,20 @@ The sample loads data into a Cassandra table and artificially degrades the perfo
 
 1. Clone this repository using `git clone https://github.com/Azure-Samples/azure-cassandra-mi-java-v4-speculative-execution`
 
-1.  Update parameters in `java-examples/src/main/resources/application.conf`: 
+1. Update parameters in `java-examples/src/main/resources/application.conf`: 
     1. Enter the datacenter name in the `DC` field.
     1. Enter `username` and `password` in `datastax-java-driver.advanced.auth-provider` section, and the IP addresses of your cluster seed nodes in `datastax-java-driver.basic.contact-points`. 
     1. Choose one node for which performance will be artifically degraded by the app, and enter the I.P. address of that node in `nodeToDegrade`.
 
 1. Run `mvn clean package` from java-examples folder to build the project. This will generate cassandra-mi-load-tester-1.0.0-SNAPSHOT.jar under target folder.
 
-1. Run java -jar target/cassandra-mi-load-tester-1.0.0-SNAPSHOT.jar in a terminal to start your java application. Initially this will run **without** using speculative query execution policy. It will create a keyspace and user table, load 50 records, and then read those records, measuring the p50, p99, and min/max latencies. You should see quite high latencies for P99 and max (along with messages that the selected node is degraded):
+1. Run `java -jar target/cassandra-mi-load-tester-1.0.0-SNAPSHOT.jar` in a terminal to start your java application. Initially this will run **without** using speculative query execution policy. It will create a keyspace and user table, load 50 records, and then read those records, measuring the p50, p99, and min/max latencies. You should see quite high latencies for P99 and max (along with messages that the selected node is degraded):
 
     ![Run 1](/media/run1.png?raw=true "run 1")
 
 1. Next, review the content of the `speculative-execution-policy` section in `java-exmple/src/main/resources/application.conf`. Notice the line `class = ConstantSpeculativeExecutionPolicy` which is commented out. When this line is commented out, a default class of `NoSpeculativeExecutionPolicy` is used. Uncomment `class = ConstantSpeculativeExecutionPolicy` to implement speculative execution.
 
-1. Run the application again. You should see significantly reduced p99 and max latency, as other nodes are speculatively queried while waiting for the response from the initial node that was queried if it exceeds a certain delay - see below. The number of nodes that are tried, and the amount of time to wait for a response from each node, is based on the values set for `max-executions` and `delay` respectively.
+1. Compile/build and run the application again. You should see significantly reduced p99 and max latency, as other nodes are speculatively queried while waiting for the response from the initial node that was queried if it exceeds a certain delay - see below. The number of nodes that are tried, and the amount of time to wait for a response from each node, is based on the values set for `max-executions` and `delay` respectively.
 
     ![Run 2](/media/run2.png?raw=true "run 2")
 

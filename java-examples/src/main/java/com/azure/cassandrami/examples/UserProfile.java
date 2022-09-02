@@ -22,6 +22,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Load data into Cassandra
  */
@@ -40,6 +43,7 @@ public class UserProfile {
     AtomicLong totalLatency = new AtomicLong(0);
     Queue<Long> latencies = new ConcurrentLinkedQueue<Long>();
     private static Configurations config = new Configurations();
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserProfile.class);
 
     public void loadData(final String keyspace, final String table, final UserRepository repository,
             final UserProfile u, final String preparedStatement, final int noOfThreads,
@@ -48,7 +52,7 @@ public class UserProfile {
         final Faker faker = new Faker();
         final ExecutorService es = Executors.newCachedThreadPool();
         int timeout = Integer.parseInt(config.getProperty("loadTimeout"));
-        System.out.println("Loading data (will timeout after "+timeout+" minutes)....");
+        LOGGER.info("Loading data (will timeout after "+timeout+" minutes)....");
         for (int i = 1; i <= noOfThreads; i++) {
             final Runnable task = () -> {
                 for (int j = 1; j <= noOfWritesPerThread; j++) {
@@ -63,7 +67,7 @@ public class UserProfile {
                         u.insertCount.incrementAndGet();
                     } catch (final Exception e) {
                         u.exceptionCount.incrementAndGet();
-                        System.out.println("Exception: " + e);
+                        LOGGER.info("Exception: " + e);
                     }
                 }
             };
@@ -73,8 +77,8 @@ public class UserProfile {
         
         final boolean finished = es.awaitTermination(timeout, TimeUnit.MINUTES);
         if (finished) {
-            System.out.println("number of records loaded: "+this.insertCount.get());
-            System.out.println("Finished executing all threads for loading data.");
+            LOGGER.info("number of records loaded: "+this.insertCount.get());
+            LOGGER.info("Finished executing all threads for loading data.");
             Thread.sleep(3000);
         }
     }
@@ -90,7 +94,7 @@ public class UserProfile {
 
         final ExecutorService es = Executors.newCachedThreadPool();
         List<List<String>> lists = Lists.partition(list, NUMBER_OF_WRITES_PER_THREAD);
-        System.out.print("executing reads..." + "\n");
+        LOGGER.info("executing reads..." + "\n");
         int iterations = Integer.parseInt(config.getProperty("iterations"));
         for (int i=0; i<iterations; i++){
             for (List<String> splitList : lists) {
@@ -108,7 +112,7 @@ public class UserProfile {
                         catch(Exception e)
                         {
                             //Swallow any exceptions
-                            System.out.println("Exception: "+e);
+                            LOGGER.info("Exception: "+e);
                         }                      
                     }
                 };
@@ -123,23 +127,23 @@ public class UserProfile {
             for (final Long id : this.latencies) {
                 latencies.add(id);
             }
-            System.out.println("Total number of reads executed: "+u.readCount.get());
-            System.out.println("p50 latency: "+percentile(latencies, 50));
-            System.out.println("p99 latency: "+percentile(latencies, 99));
+            LOGGER.info("Total number of reads executed: "+u.readCount.get());
+            LOGGER.info("p50 latency: "+percentile(latencies, 50));
+            LOGGER.info("p99 latency: "+percentile(latencies, 99));
             try{
                 Long min = Collections.min(latencies);
                 Long max = Collections.max(latencies);
-                System.out.println("Max read duration: "+max);
-                System.out.println("Min read duration: "+min);
+                LOGGER.info("Max read duration: "+max);
+                LOGGER.info("Min read duration: "+min);
             }
             catch(Exception e){
-                System.out.println("Min/Max exception: "+e);
+                LOGGER.info("Min/Max exception: "+e);
             }
 
 
             Thread.sleep(1000);
         }
-        System.out.print("load test done." + "\n");
+        LOGGER.info("load test done." + "\n");
     }
 
     public static long percentile(List<Long> latencies, double percentile) {
@@ -153,7 +157,7 @@ public class UserProfile {
         final String keyspace = "uprofile";
         final String table = "user";
         String DC = config.getProperty("DC");
-        System.out.println("Creating Cassandra session...");
+        LOGGER.info("Creating Cassandra session...");
         CqlSession cassandraSource = CqlSession.builder().withLocalDatacenter(DC).build();
         int NUMBER_OF_WRITES_PER_THREAD = Integer.parseInt(config.getProperty("threads"));
         int NUMBER_OF_THREADS = Integer.parseInt(config.getProperty("records"));        
@@ -162,17 +166,17 @@ public class UserProfile {
         try {
 
             // Create keyspace and table in cassandra database
-            System.out.println("Dropping source keyspace " + keyspace + " (if exists)... ");
+            LOGGER.info("Dropping source keyspace " + keyspace + " (if exists)... ");
             sourcerepository.deleteTable("DROP KEYSPACE IF EXISTS " + keyspace + "");
-            System.out.println("Done dropping source keyspace " + keyspace + ".");
-            System.out.println("Creating keyspace: " + keyspace + "... ");
+            LOGGER.info("Done dropping source keyspace " + keyspace + ".");
+            LOGGER.info("Creating keyspace: " + keyspace + "... ");
             sourcerepository.createKeyspace("CREATE KEYSPACE " + keyspace
                     + " WITH REPLICATION = {'class':'NetworkTopologyStrategy', '"+DC+"' :3}");
-            System.out.println("Done creating keyspace: " + keyspace + ".");
-            System.out.println("Creating table: " + table + "...");            
+                    LOGGER.info("Done creating keyspace: " + keyspace + ".");
+                    LOGGER.info("Creating table: " + table + "...");            
             sourcerepository.createTable("CREATE TABLE " + keyspace + "." + table
                     + " (user_id text PRIMARY KEY, user_name text, user_bcity text)");
-            System.out.println("Done creating table: " + table + "."); 
+                    LOGGER.info("Done creating table: " + table + "."); 
             Thread.sleep(3000);
 
 
@@ -186,7 +190,7 @@ public class UserProfile {
                     Thread.sleep(3000);
             u.readTest(keyspace, table, sourcerepository, u, NUMBER_OF_THREADS, NUMBER_OF_WRITES_PER_THREAD);
         } catch (final Exception e) {
-            System.out.println("Main Exception " + e);
+            LOGGER.info("Main Exception " + e);
         }
         System.exit(0);
     }
