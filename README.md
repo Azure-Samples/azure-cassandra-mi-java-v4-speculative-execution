@@ -45,7 +45,7 @@ The sample loads data into a Cassandra table and artificially degrades the perfo
     ![Run 2](/media/run2.png?raw=true "run 2")
 
 > [!IMPORTANT]
-> In this sample both inserts and reads are explicitly flagged as `idempotent` (see `UserRepository.java`). If a query is not idempotent, the driver will never schedule speculative executions for it, even if the policy is configured, because there is no way to guarantee that only one node will apply the mutation. Consider carefully whether a query should be idempotent or note, and ensure the setting is applied where needed.
+> In this sample both inserts and reads are explicitly flagged as `idempotent` (see `UserRepository.java`). If a query is not idempotent, the driver will never schedule speculative executions for it, even if the policy is configured, because there is no way to guarantee that only one node will apply the mutation. Consider carefully whether a query should be idempotent or not, and ensure the setting is applied where needed.
 
 > [!NOTE]
 > In a real application that implements speculative execution policy, you should of course not have a `CustomLoadBalancingPolicy.java` as shown in this sample (this is just used to artifically degrade the performance on one node from the client side). If using this sample as a basis for building an app, remove `CustomLoadBalancingPolicy.java` from the project, and the reference to it in `java-exmple/src/main/resources/application.conf`.
