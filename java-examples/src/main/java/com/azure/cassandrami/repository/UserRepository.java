@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Objects;
 
 import static com.datastax.oss.driver.api.core.ConsistencyLevel.QUORUM;
 
@@ -100,13 +99,6 @@ public class UserRepository {
      *
      * @param id user_id
      */
-    // public void selectUser(final String id, final String keyspace, final String table) {
-    //     final String query = "SELECT * FROM " + keyspace + "." + table + " where user_id ='" + id + "'";
-    //     final Row row = this.session.execute(query).one();
-    //     LOGGER.info("Obtained row: {} | {} | {} ",
-    //         Objects.requireNonNull(row).getString("user_id"), row.getString("user_name"),
-    //         row.getString("user_bcity"));
-    // }
 
     public String selectUser(final String id, final String keyspace, final String table) {
         SimpleStatement statement = SimpleStatement.newInstance("SELECT * FROM " + keyspace + "." + table + " where user_id ='" + id + "'")

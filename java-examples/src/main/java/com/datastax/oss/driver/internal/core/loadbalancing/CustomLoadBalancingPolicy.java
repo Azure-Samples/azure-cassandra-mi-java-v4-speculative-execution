@@ -70,6 +70,8 @@ public class CustomLoadBalancingPolicy extends BasicLoadBalancingPolicy implemen
   protected final Map<Node, AtomicLongArray> responseTimes = new ConcurrentHashMap<>();
   protected final Map<Node, Long> upTimes = new ConcurrentHashMap<>();
   private final boolean avoidSlowReplicas;
+  private final Logger LOGGER = LoggerFactory.getLogger(CustomLoadBalancingPolicy.class);
+
   Configurations config = new Configurations();
 
   public CustomLoadBalancingPolicy(@NonNull DriverContext context, @NonNull String profileName) {
@@ -213,11 +215,11 @@ public class CustomLoadBalancingPolicy extends BasicLoadBalancingPolicy implemen
       @NonNull Node node,
       @NonNull String logPrefix) {
 
+        //artificially slow the response of the selected node
         try {
-          //System.out.println("node: "+node.getBroadcastAddress().get().toString());
           String nodeToDegrade = "/"+config.getProperty("nodeToDegrade")+":0";
           if (node.getBroadcastAddress().get().toString().equals(nodeToDegrade)){
-            System.out.println("response from node "+node.getBroadcastAddress().get()+" artificially degraded....");
+            LOGGER.info("response from node "+node.getBroadcastAddress().get()+" artificially degraded....");
             Thread.sleep(500);
           }
         } catch (NumberFormatException e1) {
