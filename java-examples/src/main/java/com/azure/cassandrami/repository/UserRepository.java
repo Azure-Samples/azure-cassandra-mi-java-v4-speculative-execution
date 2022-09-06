@@ -96,14 +96,10 @@ public class UserRepository {
 
     /**
      * Select a row from user table
-     *
-     * @param id user_id
      */
-
     public String selectUser(final String id, final String keyspace, final String table) {
         SimpleStatement statement = SimpleStatement.newInstance("SELECT * FROM " + keyspace + "." + table + " where user_id ='" + id + "'")
         .setIdempotent(true).setConsistencyLevel(ConsistencyLevel.ONE);
-        //final String query = "SELECT * FROM " + keyspace + "." + table + " where user_id ='" + id + "'";
         final Row row = this.session.execute(statement).one();
         return row.getString("user_name");
     }    
