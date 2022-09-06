@@ -4,11 +4,11 @@ languages:
 - java
 products:
 - azure
-description: "How to implement speculative execution policy in Azure Managed Instance for Apache Cassandra"
+description: "Demo: implementing speculative execution policy in Azure Managed Instance for Apache Cassandra"
 urlFragment: azure-cassandra-mi-java-v4-speculative-execution
 ---
 
-# How to implement speculative execution policy in Azure Managed Instance for Apache Cassandra.
+# Demo: implementing speculative execution policy in Azure Managed Instance for Apache Cassandra.
 
 The sample loads data into a Cassandra table and artificially degrades the performance of a single node in the cluster to demonstrate the benefits of using `speculative-execution-policy` in Cassandra V4 Java driver.
 
